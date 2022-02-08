@@ -1,0 +1,14 @@
+templates: templates/
+
+networks:
+  - name: mgmt
+    domain: mgmt.lan
+    network: 172.21.42.0
+    subnet: 255.255.255.0
+    router: 172.21.42.1
+    nameserver: 172.21.42.2
+    hosts:
+      - name: gw
+        address: 172.21.42.1
+      - name: ns
+        address: 172.21.42.2

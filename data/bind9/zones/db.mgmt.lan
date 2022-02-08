@@ -1,0 +1,39 @@
+$ORIGIN .
+$TTL 604800	; 1 week
+mgmt.lan		IN SOA	ns.mgmt.lan. root.mgmt.lan. (
+				4280       ; serial
+				604800     ; refresh (1 week)
+				86400      ; retry (1 day)
+				2419200    ; expire (4 weeks)
+				604800     ; minimum (1 week)
+				)
+			NS	ns.mgmt.lan.
+$ORIGIN mgmt.lan.
+$TTL 150	; 2 minutes 30 seconds
+BRNB422000870E4		A	172.21.42.177
+			DHCID	( AAEB00I5ZcEV+ywBUdfuHNBGNzgOro5xQGkaSAoKSlLt
+				z5M= ) ; 1 1 32
+Driveway		A	172.21.42.174
+			DHCID	( AAEBjRW7ZVqUg5Kf90vWON3hwXQVOtMZrgbJBJmfQAFA
+				a8Y= ) ; 1 1 32
+Front-Door		A	172.21.42.178
+			DHCID	( AAEB15Rsi+5s2yNlt8ZGHOBp3qXH9CEaQJHjTMuxNfoI
+				TSU= ) ; 1 1 32
+Garage			A	172.21.42.179
+			DHCID	( AAEBXIpUNDgb1ytr5QLBKYVVtTuVDmz1bS/dn70NC0Kt
+				ef4= ) ; 1 1 32
+$TTL 604800	; 1 week
+gw			A	172.21.42.1
+$TTL 150	; 2 minutes 30 seconds
+key			A	172.21.42.101
+			DHCID	( AAIB++hAbhmWWeHr9vJCEEgRBrh/3+k6t44aK1Embml5
+				tGw= ) ; 2 1 32
+$TTL 604800	; 1 week
+ns			A	172.21.42.2
+$TTL 150	; 2 minutes 30 seconds
+octopi			A	172.21.42.176
+			DHCID	( AAEBmpkYvwXjenA2CxIdS7OyttaPfhEvT+NavCDhBIkz
+				4/I= ) ; 1 1 32
+sw1			A	172.21.42.100
+			DHCID	( AAEBOYXr+Hh/kxufg8Ugio4jeIVkNfR2cMH5cKF4x9PT
+				7u0= ) ; 1 1 32

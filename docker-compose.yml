@@ -1,0 +1,170 @@
+version: '3.8'
+
+services:
+    mdns-repeater:
+        build:
+            context: ./images/mdns-repeater
+            dockerfile: Dockerfile
+        restart: always
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "${LOGGING_MAX_SIZE}"
+                max-file: "${LOGGING_MAX_FILE}"
+        command:
+            - "-f"
+            - "${MGMT_INTERFACE}"
+            - "${HOME_INTERFACE}"
+            - "${IOT_INTERFACE}"
+        network_mode: host
+        cap_add:
+            - NET_ADMIN
+    
+    rdns-key:
+        build:
+            context: ./images/bind9
+            dockerfile: Dockerfile
+        entrypoint: /usr/sbin/rndc-confgen
+        command:
+            - "-a"
+            - "-c"
+            - "/data/rndc.key"
+        volumes:
+            - ./data/key:/data
+
+    bind9:
+        build:
+            context: ./images/bind9
+            dockerfile: Dockerfile
+        restart: always
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "${LOGGING_MAX_SIZE}"
+                max-file: "${LOGGING_MAX_FILE}"
+        command:
+            - "-4"
+            - "-g"
+            - "-c"
+            - "/data/named.conf"
+        network_mode: host
+        volumes:
+            - ./data/bind9:/data
+            - ./data/key:/key
+        cap_add:
+            - NET_ADMIN
+
+    dhcpd:
+        build:
+            context: ./images/dhcpd
+            dockerfile: Dockerfile
+        restart: always
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "${LOGGING_MAX_SIZE}"
+                max-file: "${LOGGING_MAX_FILE}"
+        command: 
+            - "-f"
+            - "-d"
+            - "--no-pid"
+            - "-cf"
+            - "/data/dhcpd.conf"
+            - "-lf"
+            - "/data/leases.db"
+        network_mode: host
+        volumes:
+            - ./data/dhcpd:/data
+            - ./data/key:/key
+        cap_add:
+            - NET_ADMIN
+
+    home-dhcrelay:
+        build:
+            context: ./images/dhcrelay
+            dockerfile: Dockerfile
+        restart: always
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "${LOGGING_MAX_SIZE}"
+                max-file: "${LOGGING_MAX_FILE}"
+        command:
+            - "-d"
+            - "--no-pid"
+            - "-iu"
+            - "${MGMT_INTERFACE}"
+            - "-id" 
+            - "${HOME_INTERFACE}"
+            - "${DHCP_SERVER_ADDRESS}"
+        network_mode: host
+        cap_add:
+            - NET_ADMIN
+
+    home-dnsmasq:
+        build:
+            context: ./images/dnsmasq
+            dockerfile: Dockerfile
+        restart: always
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "${LOGGING_MAX_SIZE}"
+                max-file: "${LOGGING_MAX_FILE}"
+        command:
+            - "--no-daemon"
+            - "--log-queries"
+            - "--log-facility=/dev/stdout"
+            - "--interface=${HOME_INTERFACE}"
+            - "--except-interface=lo"
+            - "--bind-interfaces"
+            - "--no-resolv"
+            - "--server=${DNS_SERVER_ADDRESS}"
+        network_mode: host
+        cap_add:
+            - NET_ADMIN
+
+    iot-dhcrelay:
+        build:
+            context: ./images/dhcrelay
+            dockerfile: Dockerfile
+        restart: always
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "${LOGGING_MAX_SIZE}"
+                max-file: "${LOGGING_MAX_FILE}"
+        command:
+            - "-d"
+            - "--no-pid"
+            - "-iu"
+            - "${HOME_INTERFACE}"
+            - "-id" 
+            - "${IOT_INTERFACE}"
+            - "${DHCP_SERVER_ADDRESS}"
+        network_mode: host
+        cap_add:
+            - NET_ADMIN
+
+    iot-dnsmasq:
+        build:
+            context: ./images/dnsmasq
+            dockerfile: Dockerfile
+        restart: always
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "${LOGGING_MAX_SIZE}"
+                max-file: "${LOGGING_MAX_FILE}"
+        command:
+            - "--no-daemon"
+            - "--log-queries"
+            - "--log-facility=/dev/stdout"
+            - "--interface=${IOT_INTERFACE}"
+            - "--except-interface=lo"
+            - "--bind-interfaces"
+            - "--no-resolv"
+            - "--server=${DNS_SERVER_ADDRESS}"
+        network_mode: host
+        cap_add:
+            - NET_ADMIN

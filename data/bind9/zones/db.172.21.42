@@ -1,0 +1,22 @@
+$ORIGIN .
+$TTL 604800	; 1 week
+42.21.172.in-addr.arpa	IN SOA	ns.mgmt.lan. root.mgmt.lan. (
+				2857       ; serial
+				604800     ; refresh (1 week)
+				86400      ; retry (1 day)
+				2419200    ; expire (4 weeks)
+				604800     ; minimum (1 week)
+				)
+			NS	ns.
+$ORIGIN 42.21.172.in-addr.arpa.
+1			PTR	gw.mgmt.lan.
+$TTL 150	; 2 minutes 30 seconds
+100			PTR	sw1.mgmt.lan.
+101			PTR	key.mgmt.lan.
+174			PTR	Driveway.mgmt.lan.
+176			PTR	octopi.mgmt.lan.
+177			PTR	BRNB422000870E4.mgmt.lan.
+178			PTR	Front-Door.mgmt.lan.
+179			PTR	Garage.mgmt.lan.
+$TTL 604800	; 1 week
+2			PTR	ns.mgmt.lan.

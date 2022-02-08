@@ -1,0 +1,17 @@
+$ORIGIN .
+$TTL 604800	; 1 week
+home.lan		IN SOA	ns.home.lan. root.home.lan. (
+				79         ; serial
+				604800     ; refresh (1 week)
+				86400      ; retry (1 day)
+				2419200    ; expire (4 weeks)
+				604800     ; minimum (1 week)
+				)
+			NS	ns.home.lan.
+$ORIGIN home.lan.
+gw			A	172.21.100.1
+ns			A	172.21.100.2
+$TTL 150	; 2 minutes 30 seconds
+Pixel-4a		A	172.21.100.102
+			DHCID	( AAEB9eNpLFHSKBFoGJnkYV/XCCsYqOaL/khmT7dY4Cxv
+				4Dc= ) ; 1 1 32

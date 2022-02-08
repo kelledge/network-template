@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+import os
+import argparse
+import yaml
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description='Render configuration file as service configuration fragments')
+    parser.add_argument('--config', type=str, required=True, help='path to configuration yaml file')
+    parser.add_argument('--dest', type=str, required=True, help='path to folder destination of rendered files')
+
+    return parser.parse_args()
+
+
+def init_template(path) -> Environment:
+    env = Environment(
+        loader=FileSystemLoader(path),
+        autoescape=select_autoescape()
+    )
+
+    return env
+
+
+def main():
+    args = parse_args()
+    
+    config_path = os.path.abspath(args.config)
+    dest_path = os.path.abspath(args.dest)
+
+    with open(config_path) as handle:
+        config = yaml.load(handle, Loader=yaml.Loader)
+
+    config_dir = os.path.dirname(config_path)
+    templates_dir = os.path.join(config_dir, config["templates"])
+    env = init_template(templates_dir)
+    
+    print(templates_dir)
+    print(env.list_templates())
+
+    zone_tmpl = env.get_template("zone.tmpl")
+
+    for network in config["networks"]:
+        print(network)
+        print(zone_tmpl.render(domain=network["domain"]))
+    
+    
+    
+
+
+if __name__ == '__main__':
+    main()
