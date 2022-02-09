@@ -28,9 +28,9 @@ services:
         command:
             - "-a"
             - "-c"
-            - "/data/rndc.key"
+            - "${RNDC_PATH}"
         volumes:
-            - ./data/key:/data
+            - ./data/key:/key
 
     bind9:
         build:
@@ -46,10 +46,10 @@ services:
             - "-4"
             - "-g"
             - "-c"
-            - "/data/named.conf"
+            - "${NAMED_CONFIG_PATH}"
         network_mode: host
         volumes:
-            - ./data/bind9:/data
+            - ./data/named:/named
             - ./data/key:/key
         cap_add:
             - NET_ADMIN
@@ -69,12 +69,12 @@ services:
             - "-d"
             - "--no-pid"
             - "-cf"
-            - "/data/dhcpd.conf"
+            - "${DHCPD_CONFIG_PATH}"
             - "-lf"
-            - "/data/leases.db"
+            - "${DHCPD_LEASES_PATH}"
         network_mode: host
         volumes:
-            - ./data/dhcpd:/data
+            - ./data/dhcpd:/dhcpd
             - ./data/key:/key
         cap_add:
             - NET_ADMIN

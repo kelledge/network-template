@@ -2,7 +2,35 @@
 import os
 import argparse
 import yaml
+import pathlib
+
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+
+def initialize_dest(dest: str, directories):
+    """
+    initializes the destination directory structure as configured
+    currently very procedural
+    """
+    dest_path = pathlib.Path(dest)
+
+    key_path = dest_path.joinpath(pathlib.Path(directories["key"].strip("/")))
+
+    named_config_path = dest_path.joinpath(pathlib.Path(directories["named"]["config"].strip("/")))
+    named_cache_path = dest_path.joinpath(pathlib.Path(directories["named"]["cache_dir"].strip("/")))
+    named_zones_path = dest_path.joinpath(pathlib.Path(directories["named"]["zones_dir"].strip("/")))
+
+    dhcpd_config_path = dest_path.joinpath(pathlib.Path(directories["dhcpd"]["config"].strip("/")))
+    dhcpd_leases_path = dest_path.joinpath(pathlib.Path(directories["dhcpd"]["leases"].strip("/")))
+
+    key_path.parent.mkdir(parents=True, exist_ok=True)
+
+    named_config_path.parent.mkdir(parents=True, exist_ok=True)
+    named_cache_path.mkdir(parents=True, exist_ok=True)
+    named_zones_path.mkdir(parents=True, exist_ok=True)
+
+    dhcpd_config_path.parent.mkdir(parents=True, exist_ok=True)
+    dhcpd_leases_path.parent.mkdir(parents=True, exist_ok=True)
 
 
 def parse_args() -> argparse.Namespace:
@@ -31,21 +59,41 @@ def main():
     with open(config_path) as handle:
         config = yaml.load(handle, Loader=yaml.Loader)
 
+    initialize_dest(dest_path, config["directories"])
+
     config_dir = os.path.dirname(config_path)
     templates_dir = os.path.join(config_dir, config["templates"])
     env = init_template(templates_dir)
-    
-    print(templates_dir)
-    print(env.list_templates())
 
-    zone_tmpl = env.get_template("zone.tmpl")
+    dhcpd_conf_tmpl = env.get_template("dhcpd.conf.tmpl")
+    dhcpd_conf = dhcpd_conf_tmpl.render(listen=config["listen"], networks=config["networks"], directories=config["directories"])
+    dhcpd_path = pathlib.Path(dest_path).joinpath(config["directories"]["dhcpd"]["config"].strip("/"))
+
+    with open(dhcpd_path, "w") as handle:
+        handle.write(dhcpd_conf)
+
+    named_conf_tmpl = env.get_template("named.conf.tmpl")
+    named_conf = named_conf_tmpl.render(listen=config["listen"], networks=config["networks"], directories=config["directories"])
+    named_path = pathlib.Path(dest_path).joinpath(config["directories"]["named"]["config"].strip("/"))
+
+    with open(named_path, "w") as handle:
+        handle.write(named_conf)
 
     for network in config["networks"]:
-        print(network)
-        print(zone_tmpl.render(domain=network["domain"]))
+        rev_tmpl = env.get_template("reverse.tmpl")
+        fwd_tmpl = env.get_template("zone.tmpl")
+
+        rev_conf = rev_tmpl.render(dns=network["dns"], hosts=network["hosts"])
+        fwd_conf = fwd_tmpl.render(dns=network["dns"], hosts=network["hosts"])
+        
+        zones_path = pathlib.Path(dest_path).joinpath(config["directories"]["named"]["zones_dir"].strip("/"))
+        
+        rev_path = zones_path.joinpath(f"db.reverse.{network['name']}")
+        fwd_path = zones_path.joinpath(f"db.forward.{network['name']}")
     
-    
-    
+        with open(rev_path, "w") as rev_handle, open(fwd_path, "w") as zones_handle:
+            rev_handle.write(rev_conf)
+            zones_handle.write(fwd_conf)
 
 
 if __name__ == '__main__':

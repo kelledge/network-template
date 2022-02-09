@@ -1,0 +1,37 @@
+include "{{ directories.key }}";
+
+options {
+	directory "{{ directories.named.cache_dir }}";
+
+    listen-on {
+        {{ listen.named }};
+    };
+
+	// Set the IP addresses of your ISP's DNS servers:
+	forwarders {
+		8.8.8.8;
+		8.8.4.4;
+	};
+
+	dnssec-validation auto;
+};
+
+{%- for n in networks %}
+//
+// End Network: "{{ n.name }}"
+//
+zone "{{ n.dns.forward }}" {
+    type master;
+    file "{{ directories.named.zones_dir }}/db.forward.{{ n.name }}";
+    allow-update { key rndc-key; };
+};
+   
+zone "{{ n.dns.reverse }}" {
+    type master;
+    file "{{ directories.named.zones_dir }}/db.reverse.{{ n.name }}";
+    allow-update { key rndc-key; };
+};
+//
+// End Network: "{{ n.name }}"
+//
+{% endfor %}

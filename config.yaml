@@ -1,14 +1,97 @@
 templates: templates/
 
+directories:
+  key: /key/rndc.key
+  named:
+    config: /named/named.conf
+    cache_dir: /named/cache
+    zones_dir: /named/zones
+  dhcpd:
+    config: /dhcpd/dhcpd.conf
+    leases: /dhcpd/leases.db
+
+listen:
+  named: 172.21.42.2
+  dhcpd: 172.21.42.2
+
 networks:
   - name: mgmt
-    domain: mgmt.lan
-    network: 172.21.42.0
-    subnet: 255.255.255.0
-    router: 172.21.42.1
-    nameserver: 172.21.42.2
+    network:
+      link: eth0
+      address: 172.21.42.2
+      network: 172.21.42.0
+      subnet: 255.255.255.0
+      router: 172.21.42.1
+    dns:
+      server: 172.21.42.2
+      forward: mgmt.lan.
+      reverse: 42.21.172.in-addr.arpa.
+      master: ns.mgmt.lan.
+      email: root.mgmt.lan.
+    dhcp:
+      server: 172.21.42.2
+      start: 172.21.42.100
+      end: 172.21.42.200
     hosts:
       - name: gw
         address: 172.21.42.1
+        ptr: 1
       - name: ns
         address: 172.21.42.2
+        ptr: 2
+
+  - name: home
+    network:
+      link: eth0
+      vlan:
+        id: 100
+        name: home
+      address: 172.21.100.2
+      network: 172.21.100.0
+      subnet: 255.255.255.0
+      router: 172.21.100.1
+    dns:
+      server: 172.21.100.2
+      forward: home.lan.
+      reverse: 100.21.172.in-addr.arpa.
+      master: ns.home.lan.
+      email: root.home.lan.
+    dhcp:
+      server: 172.21.100.2
+      start: 172.21.100.100
+      end: 172.21.100.200
+    hosts:
+      - name: gw
+        address: 172.21.100.1
+        ptr: 1
+      - name: ns
+        address: 172.21.100.2
+        ptr: 2
+  
+  - name: iot
+    network:
+      link: eth0
+      vlan:
+        id: 200
+        name: iot
+      address: 172.21.200.2
+      network: 172.21.200.0
+      subnet: 255.255.255.0
+      router: 172.21.200.1
+    dns:
+      server: 172.21.200.2
+      forward: iot.lan.
+      reverse: 200.21.172.in-addr.arpa.
+      master: ns.iot.lan.
+      email: root.iot.lan.
+    dhcp:
+      server: 172.21.200.2
+      start: 172.21.200.100
+      end: 172.21.200.200
+    hosts:
+      - name: gw
+        address: 172.21.200.1
+        ptr: 1
+      - name: ns
+        address: 172.21.200.2
+        ptr: 2

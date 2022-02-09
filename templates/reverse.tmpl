@@ -1,14 +1,14 @@
 $ORIGIN .
 $TTL 604800	; 1 week
-{{ dns.forward }}	IN SOA	{{ dns.master }}	{{ dns.email }} (
-				79         ; serial
+{{ dns.reverse }}	IN SOA	{{ dns.master }}	{{ dns.email }} (
+				55         ; serial
 				604800     ; refresh (1 week)
 				86400      ; retry (1 day)
 				2419200    ; expire (4 weeks)
 				604800     ; minimum (1 week)
 				)
-			NS	ns.home.lan.
-$ORIGIN {{ dns.forward }}
+			NS	ns.
+$ORIGIN {{ dns.reverse }}
 {%- for h in hosts %}
-{{ h.name }}		A	{{ h.address }}
+{{ h.ptr }}		PTR	{{ h.name }}.{{ dns.forward }}
 {%- endfor %}

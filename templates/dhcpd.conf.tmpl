@@ -1,0 +1,35 @@
+include "{{ directories.key }}";
+
+ddns-updates on;
+ddns-update-style standard;
+
+authoritative;
+
+{%- for n in networks %}
+#
+# Start Network: "{{ n.name }}"
+#
+zone {{ n.dns.forward }} {  
+    primary {{ n.dns.server }};
+    key rndc-key;
+}
+
+zone {{ n.dns.reverse }} {  
+    primary {{ n.dns.server }};
+    key rndc-key;
+}
+
+subnet {{ n.network.network }} netmask {{ n.network.netmask }} {
+    range {{ n.dhcp.start }} {{ n.dhcp.end }};
+
+    default-lease-time 300;
+    max-lease-time 600;
+
+    option routers {{ n.network.router }};
+    option domain-name "{{ n.dns.forward }}";
+    option domain-name-servers {{ n.dns.server }};
+}
+#
+# End Network: "{{ n.name }}"
+#
+{% endfor %}
